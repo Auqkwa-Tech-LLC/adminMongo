@@ -90,45 +90,47 @@ exports.serverMonitoring = function (monitoringDB, dbs){
     }
 };
 
-function getDocCounts(currCounts, newCounts){
+function getDocCounts(currCounts, newCounts) {
     var newDocCounts = {
         queried: 0,
         inserted: 0,
         deleted: 0,
         updated: 0
     };
+    
+    if (newCounts !== undefined) {  // FIX FOR #195
+        // querie
+        if(currCounts.queried === 0){
+            currCounts.queried = newCounts.returned;
+        }else{
+            newDocCounts.queried = newCounts.returned - currCounts.queried;
+            currCounts.queried = newCounts.returned;
+        }
 
-    // queried
-    if(currCounts.queried === 0){
-        currCounts.queried = newCounts.returned;
-    }else{
-        newDocCounts.queried = newCounts.returned - currCounts.queried;
-        currCounts.queried = newCounts.returned;
+
+        // inserts
+        if(currCounts.inserted === 0){
+            currCounts.inserted = newCounts.inserted;
+        }else{
+            newDocCounts.inserted = newCounts.inserted - currCounts.inserted;
+            currCounts.inserted = newCounts.inserted;
+        }
+
+        // deleted
+        if(currCounts.deleted === 0){
+            currCounts.deleted = newCounts.deleted;
+        }else{
+            newDocCounts.deleted = newCounts.deleted - currCounts.deleted;
+            currCounts.deleted = newCounts.deleted;
+        }
+
+        // updated
+        if(currCounts.updated === 0){
+            currCounts.updated = newCounts.updated;
+        }else{
+            newDocCounts.updated = newCounts.updated - currCounts.updated;
+            currCounts.updated = newCounts.updated;
+        }
     }
-
-    // inserts
-    if(currCounts.inserted === 0){
-        currCounts.inserted = newCounts.inserted;
-    }else{
-        newDocCounts.inserted = newCounts.inserted - currCounts.inserted;
-        currCounts.inserted = newCounts.inserted;
-    }
-
-    // deleted
-    if(currCounts.deleted === 0){
-        currCounts.deleted = newCounts.deleted;
-    }else{
-        newDocCounts.deleted = newCounts.deleted - currCounts.deleted;
-        currCounts.deleted = newCounts.deleted;
-    }
-
-    // updated
-    if(currCounts.updated === 0){
-        currCounts.updated = newCounts.updated;
-    }else{
-        newDocCounts.updated = newCounts.updated - currCounts.updated;
-        currCounts.updated = newCounts.updated;
-    }
-
     return newDocCounts;
 }

@@ -9,9 +9,7 @@ on:
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Build and push Docker images
@@ -24,7 +22,7 @@ jobs:
         # Server address of Docker registry. If not set then will default to Docker Hub
         registry: docker.pkg.github.com
         # Docker repository to tag the image with
-        repository: Auqkwa-Tech-LLC/adminMongo/admin-mongo
+        repository: auqkwa-tech-llc/adminMongo/admin-mongo
         # Automatically tags the built image with the git reference as per the readme
         tag_with_ref: true
         # Automatically tags the built image with the git short SHA as per the readme

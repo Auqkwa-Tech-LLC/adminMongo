@@ -22,7 +22,7 @@ jobs:
         # Server address of Docker registry. If not set then will default to Docker Hub
         registry: docker.pkg.github.com
         # Docker repository to tag the image with
-        repository: auqkwa-tech-llc/adminMongo/admin-mongo
+        repository: auqkwa-tech-llc/adminmongo/admin-mongo
         # Automatically tags the built image with the git reference as per the readme
         tag_with_ref: true
         # Automatically tags the built image with the git short SHA as per the readme

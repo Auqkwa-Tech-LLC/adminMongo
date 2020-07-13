@@ -175,13 +175,14 @@ router.get('/app/:conn/:db', function (req, res, next){
         return;
     }
     // Get DB's form pool
-    var mongo_db = connection_list[req.params.conn].native.db(req.params.db);
+    var mongo_db = connection_list[req.params.conn].native;
+    var mongo_db_db = mongo_db.db(req.params.db);
 
     // do DB stuff
     common.get_db_stats(mongo_db, req.params.db, function (err, db_stats){
         common.get_sidebar_list(mongo_db, req.params.db, function (err, sidebar_list){
-            mongo_db.command({usersInfo: 1}, function (err, conn_users){
-                mongo_db.listCollections().toArray(function (err, collection_list){
+            mongo_db_db.command({usersInfo: 1}, function (err, conn_users){
+                mongo_db_db.listCollections().toArray(function (err, collection_list){
                     res.render('db', {
                         conn_name: req.params.conn,
                         conn_list: common.order_object(connection_list),
@@ -228,14 +229,15 @@ router.get('/app/:conn/:db/:coll/view/:page_num', function (req, res, next){
     }
 
     // Get DB's form pool
-    var mongo_db = connection_list[req.params.conn].native.db(req.params.db);
+    var mongo_db = connection_list[req.params.conn].native;
+    var mongo_db_db = mongo_db.db(req.params.db);
 
     // do DB stuff
-    mongo_db.listCollections().toArray(function (err, collection_list){
+    mongo_db_db.listCollections().toArray(function (err, collection_list){
         // clean up the collection list
         collection_list = common.cleanCollections(collection_list);
         common.get_sidebar_list(mongo_db, req.params.db, function (err, sidebar_list){
-            mongo_db.db(req.params.db).collection(req.params.coll).count(function (err, coll_count){
+            mongo_db_db.collection(req.params.coll).count(function (err, coll_count){
                 if(collection_list.indexOf(req.params.coll) === -1){
                     common.render_error(res, req, 'Database or Collection does not exist', req.params.conn);
                 }else{
@@ -278,13 +280,14 @@ router.get('/app/:conn/:db/:coll/indexes', function (req, res, next){
     }
 
     // Get DB's form pool
-    var mongo_db = connection_list[req.params.conn].native.db(req.params.db);
+    var mongo_db = connection_list[req.params.conn].native;
+    var mongo_db_db = mongo_db.db(req.params.db);
 
     // do DB stuff
-    mongo_db.listCollections().toArray(function (err, collection_list){
+    mongo_db_db.listCollections().toArray(function (err, collection_list){
         // clean up the collection list
         collection_list = common.cleanCollections(collection_list);
-        mongo_db.collection(req.params.coll).indexes(function (err, coll_indexes){
+        mongo_db_db.collection(req.params.coll).indexes(function (err, coll_indexes){
             common.get_sidebar_list(mongo_db, req.params.db, function (err, sidebar_list){
                 if(collection_list.indexOf(req.params.coll) === -1){
                     console.error('No collection found');
@@ -324,10 +327,11 @@ router.get('/app/:conn/:db/:coll/new', function (req, res, next){
     }
 
     // Get DB form pool
-    var mongo_db = connection_list[req.params.conn].native.db(req.params.db);
+    var mongo_db = connection_list[req.params.conn].native;
+    var mongo_db_db = mongo_db.db(req.params.db);
 
     // do DB stuff
-    mongo_db.listCollections().toArray(function (err, collection_list){
+    mongo_db_db.listCollections().toArray(function (err, collection_list){
         // clean up the collection list
         collection_list = common.cleanCollections(collection_list);
         common.get_sidebar_list(mongo_db, req.params.db, function (err, sidebar_list){
@@ -368,14 +372,15 @@ router.get('/app/:conn/:db/:coll/:id', function (req, res, next){
     }
 
     // Get DB's form pool
-    var mongo_db = connection_list[req.params.conn].native.db(req.params.db);
+    var mongo_db = connection_list[req.params.conn].native;
+    var mongo_db_db = mongo_db.db(req.params.db);
 
     // do DB stuff
-    mongo_db.listCollections().toArray(function (err, collection_list){
+    mongo_db_db.listCollections().toArray(function (err, collection_list){
         // clean up the collection list
         collection_list = common.cleanCollections(collection_list);
         common.get_sidebar_list(mongo_db, req.params.db, function (err, sidebar_list){
-            mongo_db.db(req.params.db).collection(req.params.coll).count(function (err, coll_count){
+            mongo_db_db.db(req.params.db).collection(req.params.coll).count(function (err, coll_count){
                 if(collection_list.indexOf(req.params.coll) === -1){
                     common.render_error(res, req, 'Database or Collection does not exist', req.params.conn);
                 }else{
@@ -419,11 +424,12 @@ router.get('/app/:conn/:db/:coll/edit/:doc_id', function (req, res, next){
     }
 
     // Get DB's form pool
-    var mongo_db = connection_list[req.params.conn].native.db(req.params.db);
+    var mongo_db = connection_list[req.params.conn].native;
+    var mongo_db_db = mongo_db.db(req.params.db);
 
     // do DB stuff
     common.get_sidebar_list(mongo_db, req.params.db, function(err, sidebar_list){
-        common.get_id_type(mongo_db, req.params.coll, req.params.doc_id, function (err, result){
+        common.get_id_type(mongo_db_db, req.params.coll, req.params.doc_id, function (err, result){
             if(result.doc === undefined){
                 console.error('No document found');
                 common.render_error(res, req, req.i18n.__('Document not found'), req.params.conn);

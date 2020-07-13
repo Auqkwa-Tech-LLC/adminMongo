@@ -111,21 +111,6 @@ if(!fs.existsSync(config_app)) fs.writeFileSync(config_app, JSON.stringify(confi
 var configConnection = {
     connections: {}
 };
-if(process.env.CONN_NAME && process.env.DB_HOST) {
-    if(!process.env.DB_PORT) process.env.DB_PORT = '27017'; // Use the default mongodb port when DB_PORT is not set
-    var connectionString = 'mongodb://';
-    if(process.env.DB_USERNAME && process.env.DB_PASSWORD && process.env.DB_NAME) {
-        connectionString += process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD + '@' + process.env.DB_HOST + ':' + process.env.DB_PORT + '/' + process.env.DB_NAME;
-    }else if (process.env.DB_USERNAME && process.env.DB_PASSWORD) {
-        connectionString += process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD + '@' + process.env.DB_HOST + ':' + process.env.DB_PORT + '/'
-    } else {    
-        connectionString += process.env.DB_HOST + ':' + process.env.DB_PORT
-    }
-    configConnection.connections[process.env.CONN_NAME] = {
-        connection_options: {},
-        connection_string: connectionString
-    };
-}
 if (!fs.existsSync(config_connections) || fs.readFileSync(config_connections, 'utf8') === '{}')
     fs.writeFileSync(config_connections, JSON.stringify(configConnection));
 
@@ -267,6 +252,42 @@ var connPool = require('./connections');
 var monitoring = require('./monitoring');
 app.locals.dbConnections = null;
 
+if(process.env.CONN_NAME && process.env.DB_HOST) {
+    if(!process.env.DB_PORT) process.env.DB_PORT = '27017'; // Use the default mongodb port when DB_PORT is not set
+    var connectionString = 'mongodb://';
+    if(process.env.DB_USERNAME && process.env.DB_PASSWORD && process.env.DB_NAME) {
+        connectionString += process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD + '@' + process.env.DB_HOST + ':' + process.env.DB_PORT + '/' + process.env.DB_NAME;
+    }else if (process.env.DB_USERNAME && process.env.DB_PASSWORD) {
+        connectionString += process.env.DB_USERNAME + ':' + process.env.DB_PASSWORD + '@' + process.env.DB_HOST + ':' + process.env.DB_PORT + '/'
+    } else {    
+        connectionString += process.env.DB_HOST + ':' + process.env.DB_PORT
+    }
+    try{
+        const key = process.env.CONN_NAME;
+        connPool.addConnection({connName: key, connString: connectionString, connOptions: {}}, app, function (err, data){
+            if(err) {
+                console.error(err);
+                delete connection_list[key];
+            } else {
+                try {
+                    // delete current config
+                    delete nconf.store.connections[req.body.curr_config];
+                } catch {}
+
+                // set the new
+                nconf.set('connections:' + key, {'connection_string': connectionString, 'connection_options': {}});
+
+                // save for ron
+                nconf.save(function (err){
+                    if(err) console.error('Config error1: ' + err);
+                });
+            }
+        });
+    }catch(err){
+        if(err) console.error(err.message);
+    }
+}
+
 async.forEachOf(connection_list, function (value, key, callback){
     var MongoURI = require('mongo-uri');
 
@@ -277,6 +298,7 @@ async.forEachOf(connection_list, function (value, key, callback){
             callback();
         });
     }catch(err){
+        if(err) console.error(err.message);
         callback();
     }
 },

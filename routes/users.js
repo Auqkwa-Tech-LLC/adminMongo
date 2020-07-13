@@ -27,6 +27,9 @@ router.post('/users/:conn/:db/user_create', function (req, res, next){
 
     // do DB stuff
     var roles = req.body.roles_text ? req.body.roles_text.split(/\s*,\s*/) : [];
+    if (roles.length === 0) {
+        roles = ["readWrite"];
+    }
 
     // Add a user
     mongo_db.addUser(req.body.username, req.body.user_password, {'roles': roles}, function (err, user_name){
